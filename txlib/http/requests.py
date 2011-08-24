@@ -1,5 +1,6 @@
 # -*- coding: utf-8 -*-
 
+from txlib.http import json
 from txlib.http.base import BaseRequest
 
 
@@ -21,7 +22,7 @@ class HttpRequest(BaseRequest):
         Raises:
             An exception depending on the HTTP status code of the response.
         """
-        return self._make_request('GET', path)
+        return json.loads(self._make_request('GET', path))
 
     def post(self, path, data, filename=None):
         """Make a POST request.
