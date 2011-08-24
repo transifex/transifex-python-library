@@ -4,6 +4,7 @@ Tests for requests.
 """
 
 from txlib.http.base import BaseRequest
+from txlib.http.exceptions import UnknownError
 from txlib.http.tests import unittest
 
 
@@ -65,3 +66,33 @@ class TestBaseRequest(unittest.TestCase):
                 len(path)
         )
 
+        # port is set
+        host = "http://www.example.com:8000"
+        path = "/path/to/resource/"
+        b = BaseRequest(host)
+        url = b._construct_full_url(path)
+        self.assertIn(host, url)
+        self.assertIn(path, url)
+        self.assertEquals(len(url), len(host) + len(path))
+
+        # both hast and path have bakslashes
+        host = "http://www.example.com/"
+        path = "/path/to/resource/"
+        b = BaseRequest(host)
+        url = b._construct_full_url(path)
+        self.assertIn(host, url)
+        self.assertIn(path, url)
+        self.assertEquals(len(url), len(host) - len('/') + len(path))
+
+    def test_error_messages(self):
+        """Test the error messages of the requests."""
+        b = BaseRequest('www.example.com')
+        for code, msg in b.error_messages.iteritems():
+            self.assertIn(msg, b._error_message(code, msg))
+
+    def test_http_exceptions(self):
+        """Test the exceptions raised for each HTTP 4xx code."""
+        b = BaseRequest('www.example.com')
+        for code, klass in b.errors.iteritems():
+            self.assertIsInstance(b._exception_for(code), klass)
+        self.assertisInstance(b._exception_for(499), UnknownError)

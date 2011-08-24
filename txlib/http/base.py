@@ -86,7 +86,7 @@ class BaseRequest(object):
             UnknownError: The HTTP status code is not one of the knowns.
         """
         try:
-            return self.errors[code]
+            return self.errors[code]()
         except KeyError, e:
             raise UnknownError(e.message, http_code=code)
 
