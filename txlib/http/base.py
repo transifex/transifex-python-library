@@ -2,6 +2,7 @@
 
 from __future__ import with_statement
 import urlparse
+from txlib.http import _logger
 from txlib.http.auth import AnonymousAuth
 from txlib.http.exceptions import *
 
@@ -42,6 +43,7 @@ class BaseRequest(object):
             auth: The authentication info needed for any requests.
         """
         self._hostname = self._construct_full_hostname(hostname)
+        _logger.debug("Hostname is %s" % self._hostname)
         self._auth_info = auth
 
     def _construct_full_hostname(self, hostname):
@@ -92,5 +94,3 @@ class BaseRequest(object):
             return RemoteServerError
         else:
             return UnknownError
-
-

@@ -93,12 +93,17 @@ class HttpRequest(BaseRequest):
         Raises:
             An exception depending on the HTTP status code of the response.
         """
+        _logger.debug("Method for request is %s" % method)
         url = self._construct_full_url(path)
+        _logger.debug("URL for request is %s" % url)
         self._auth_info.populate_request_data(kwargs)
+        _logger.debug("The arguments are %s" % kwags)
         res = requests.request(method, url, data=data, **kwargs)
         if res.code in self.success:
+            _logger.debug("Request was successful.")
             return res.content
         else:
+            _logger.debug("Response was %s:%s" % (res.code, res.content))
             raise self._exception_for(res.code)(
                 http_code=res.code, msg=res.content
             )
