@@ -79,16 +79,18 @@ class BaseRequest(object):
         return self.error_messages[code] % msg
 
     def _exception_for(self, code):
-        """Return an instance of the exception class suitable for the
-        specified http status code.
+        """Return the exception class suitable for the specified HTTP
+        status code.
 
         Raises:
             UnknownError: The HTTP status code is not one of the knowns.
         """
-        try:
-            return self.errors[code]()
-        except KeyError, e:
-            raise UnknownError(e.message, http_code=code)
+        if code in self.errors:
+            return self.errors[code]
+        elif 500 <= code < 599:
+            return RemoteServerError
+        else:
+            return UnknownError
 
 
 class HttpRequest(BaseRequest):

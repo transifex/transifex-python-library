@@ -4,7 +4,7 @@ Tests for requests.
 """
 
 from txlib.http.base import BaseRequest
-from txlib.http.exceptions import UnknownError
+from txlib.http.exceptions import UnknownError, RemoteServerError
 from txlib.http.tests import unittest
 
 
@@ -94,5 +94,7 @@ class TestBaseRequest(unittest.TestCase):
         """Test the exceptions raised for each HTTP 4xx code."""
         b = BaseRequest('www.example.com')
         for code, klass in b.errors.iteritems():
-            self.assertIsInstance(b._exception_for(code), klass)
-        self.assertisInstance(b._exception_for(499), UnknownError)
+            self.assertIs(b._exception_for(code), klass)
+        self.assertIs(b._exception_for(499), UnknownError)
+        for code in (500, 501, 502, ):
+            self.assertIs(b._exception_for(code), RemoteServerError)
