@@ -94,7 +94,13 @@ class HttpRequest(BaseRequest):
         """
         url = self._construct_full_url(path)
         self._auth_info.populate_request_data(kwargs)
-        return requests.request(method, url, data=data, **kwargs)
+        res = requests.request(method, url, data=data, **kwargs)
+        if res.code in self.success:
+            return res.content
+        else:
+            raise self._exception_for(res.code)(
+                http_code=res.code, msg=res.content
+            )
 
     def _send(self, method, path, data, filename):
         """Send data to a remote server, either with a POST or a PUT request.
