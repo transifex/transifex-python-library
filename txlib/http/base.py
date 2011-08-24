@@ -19,6 +19,7 @@ class BaseRequest(object):
     success = {
         200: "OK",
         201: "Created",
+        204: "Deleted",
     }
 
     error_messages = {
