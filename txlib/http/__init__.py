@@ -11,3 +11,7 @@ if sys.version_info < (2, 6):
     import simplejson as json
 else:
     import json
+
+import logging
+_logger = logging.getLogger('txlib.http')
+
