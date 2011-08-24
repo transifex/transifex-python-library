@@ -99,7 +99,7 @@ class HttpRequest(BaseRequest):
         self._auth_info.populate_request_data(kwargs)
         _logger.debug("The arguments are %s" % kwags)
         res = requests.request(method, url, data=data, **kwargs)
-        if res.code in self.success:
+        if res.ok:
             _logger.debug("Request was successful.")
             return res.content
         else:
