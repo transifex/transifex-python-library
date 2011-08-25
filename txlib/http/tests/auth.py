@@ -1,7 +1,7 @@
 # -*- coding: utf-8 -*-
 
 from txlib.http.auth import AuthInfo, BasicAuth, AnonymousAuth
-from txlib.http.tests import unittest
+from txlib.utils.imports import unittest
 
 
 class TestAuthInfo(unittest.TestCase):

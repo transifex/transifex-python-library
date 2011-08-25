@@ -4,12 +4,12 @@ Tests for requests.
 """
 
 from txlib.utils import json
+from txlib.utils.imports import unittest
 from txlib.http.base import BaseRequest
 from txlib.http.http_requests import HttpRequest
 from txlib.http.auth import AnonymousAuth, BasicAuth
 from txlib.http.exceptions import UnknownError, RemoteServerError, \
         AuthorizationError, ConflictError, NotFoundError, RequestError
-from txlib.http.tests import unittest
 
 
 class TestBaseRequest(unittest.TestCase):
