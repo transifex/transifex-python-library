@@ -16,28 +16,40 @@ class ServerError(Exception):
 class RequestError(ServerError):
     """Class to indicate a generic error with the request
     to the remote server.
+
+    This is a 400 error.
     """
-    pass
 
 
 class NotFoundError(ServerError):
-    """Class to indicate a resource has not been found in the remote server."""
-    pass
+    """Class to indicate a resource has not been found in the remote server.
+
+    This is for 404 errors"""
 
 
 class AuthenticationError(ServerError):
-    """Class to indicate a problem with the username and/or password."""
-    pass
+    """Class to indicate a problem with the username and/or password.
+
+    This is a 403 error.
+    """
 
 
 class AuthorizationError(ServerError):
-    """Class to indicate that authorization is required."""
-    pass
+    """Class to indicate that authorization is required.
+
+    This is a 401 error.
+    """
+
+
+class ConflictError(ServerError):
+    """Class to indicate a conflict for the resource in the server.
+
+    This is a 409 error.
+    """
 
 
 class UnknownError(ServerError):
     """Class for errors which are not handled specifically."""
-    pass
 
 
 class RemoteServerError(ServerError):
