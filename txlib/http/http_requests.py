@@ -105,9 +105,9 @@ class HttpRequest(BaseRequest):
             _logger.debug("Request was successful.")
             return res.content
         else:
-            _logger.debug("Response was %s:%s" % (res.code, res.content))
-            raise self._exception_for(res.code)(
-                http_code=res.code, msg=res.content
+            _logger.debug("Response was %s:%s" % (res.status_code, res.content))
+            raise self._exception_for(res.status_code)(
+                res.content, http_code=res.status_code
             )
 
     def _send(self, method, path, data, filename):
