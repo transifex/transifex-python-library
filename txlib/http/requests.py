@@ -1,6 +1,8 @@
 # -*- coding: utf-8 -*-
 
+import requests
 from txlib.http import json
+from txlib.http import _logger
 from txlib.http.base import BaseRequest
 
 
