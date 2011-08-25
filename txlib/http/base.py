@@ -15,6 +15,7 @@ class BaseRequest(object):
         401: AuthorizationError,
         403: AuthenticationError,
         404: NotFoundError,
+        409: ConflictError,
     }
 
     success = {
@@ -28,6 +29,7 @@ class BaseRequest(object):
         401: "Authorization is required: %s",
         403: "Authentication error: %s",
         404: "Entity was not found: %s",
+        409: "Error with the request: %s",
     }
 
     default_scheme = 'https'
