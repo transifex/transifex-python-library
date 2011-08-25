@@ -6,6 +6,10 @@ class BaseModel(object):
 
     Each model has a list of fields. The model works as a proxy between the
     local application and the remote Tx server.
+
+    The user of the class can either create a local-only instance using the
+    staticmethod ``get`` or retrieve a remote object whenever he accesses
+    an attribute that has no value.
     """
 
     fields = []
