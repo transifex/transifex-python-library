@@ -3,7 +3,6 @@
 
 from txlib.utils.imports import unittest
 from txlib.registry.registry import _Registry
-from txlib.registry.exceptions import DoesNotExist
 from txlib.http.auth import AnonymousAuth, BasicAuth
 
 
@@ -21,7 +20,7 @@ class TestRegistry(unittest.TestCase):
 
     def test_get_unknown_responsibility(self):
         """Test wrong responsibilities."""
-        self.assertRaises(DoesNotExist, self.r.__getattr__, 'wrong')
+        self.assertIs(self.r.wrong, None)
 
     def test_get_responsibility(self):
         """Test fetching the class for a responsibility."""
