@@ -2,7 +2,7 @@
 
 from txlib.utils import _logger
 from txlib.registry.exceptions import DoesNotExist
-from txlib.http.auth import BasicAuth
+from txlib.http.auth import AnonymousAuth
 from txlib.http.http_requests import HttpRequest
 
 
@@ -13,10 +13,7 @@ class _Registry(object):
     responsibilities to classes.
     """
 
-    responsibilities = {
-        'auth_class': BasicAuth,
-        'http_handler': HttpRequest,
-    }
+    responsibilities = {}
 
     def __getattr__(self, name):
         """Return the class for the various responsibilities."""

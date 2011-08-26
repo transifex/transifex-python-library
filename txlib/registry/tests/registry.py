@@ -35,12 +35,12 @@ class TestRegistry(unittest.TestCase):
     def test_setup(self):
         """Test the setup of a responsibility object."""
         self.r.setup({'new': 'new'})
-        self.assertEquals(len(self.r.responsibilities.keys()), 3)
+        self.assertEquals(len(self.r.responsibilities.keys()), 1)
         self.assertEquals(self.r.new, 'new')
         self.r.setup({'auth_class': AnonymousAuth})
-        self.assertEquals(len(self.r.responsibilities.keys()), 3)
+        self.assertEquals(len(self.r.responsibilities.keys()), 2)
         self.assertEquals(self.r.auth_class, AnonymousAuth)
         self.r.setup({'auth_class': BasicAuth, 'newnew': 'newnew'})
-        self.assertEquals(len(self.r.responsibilities.keys()), 4)
+        self.assertEquals(len(self.r.responsibilities.keys()), 3)
         self.assertEquals(self.r.auth_class, BasicAuth)
         self.assertEquals(self.r.newnew, 'newnew')
