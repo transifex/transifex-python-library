@@ -2,9 +2,9 @@
 
 from __future__ import with_statement
 import urlparse
-from txlib.http import _logger
 from txlib.http.auth import AnonymousAuth
 from txlib.http.exceptions import *
+from txlib.utils import _logger
 
 
 class BaseRequest(object):

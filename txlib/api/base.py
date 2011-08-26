@@ -1,5 +1,7 @@
 # -*- coding: utf-8 -*-
 
+from txib.utils import _logger
+
 
 class BaseModel(object):
     """Base class for Tx models.
