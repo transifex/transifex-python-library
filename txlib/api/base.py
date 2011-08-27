@@ -39,6 +39,9 @@ class BaseBackend(object):
     """Base class for Tx models backend.
 
     Each backend allows to get, create, edit and delete a resource.
+
+    The backend holds the path part of the URL, while the host part is held
+    by the ``http`` variable.
     """
 
     _prefix = '/api/2/'
