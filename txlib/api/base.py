@@ -1,6 +1,6 @@
 # -*- coding: utf-8 -*-
 
-from txib.utils import _logger
+from txlib.utils import _logger
 from txlib.registry import registry
 
 
