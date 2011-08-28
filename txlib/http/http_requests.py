@@ -4,6 +4,7 @@ import requests
 from txlib.utils import _logger
 from txlib.utils.imports import json
 from txlib.http.base import BaseRequest
+from txlib.http.exceptions import NoResponseError
 
 
 class HttpRequest(BaseRequest):
@@ -101,14 +102,20 @@ class HttpRequest(BaseRequest):
         self._auth_info.populate_request_data(kwargs)
         _logger.debug("The arguments are %s" % kwargs)
         res = requests.request(method, url, data=data, **kwargs)
+
         if res.ok:
             _logger.debug("Request was successful.")
             return res.content
-        else:
+
+        if hasattr(res, 'content'):
             _logger.debug("Response was %s:%s" % (res.status_code, res.content))
             raise self._exception_for(res.status_code)(
                 res.content, http_code=res.status_code
             )
+        else:
+            msg = "No response from the  URL %s" % res.request.url
+            _logger.error(msg)
+            raise NoResponseError(msg)
 
     def _send(self, method, path, data, filename):
         """Send data to a remote server, either with a POST or a PUT request.

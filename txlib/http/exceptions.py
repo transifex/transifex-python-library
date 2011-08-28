@@ -54,3 +54,7 @@ class UnknownError(ServerError):
 
 class RemoteServerError(ServerError):
     """Class for 5xx errors."""
+
+
+class NoResponseError(ServerError):
+    """Exception raised when there was no connection to the remopte server."""
