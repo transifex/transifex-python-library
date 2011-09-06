@@ -31,7 +31,7 @@ class BaseModel(object):
         self._prefix = prefix
 
     def _populate(self):
-        """Populate the isntance with the values from the server."""
+        """Populate the instance with the values from the server."""
         pass
 
 
