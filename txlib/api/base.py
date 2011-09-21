@@ -1,6 +1,7 @@
 # -*- coding: utf-8 -*-
 
 from txlib.utils import _logger
+from txlib.utils.imports import json
 from txlib.registry import registry
 
 
@@ -106,12 +107,12 @@ class BaseModel(object):
         path = self._construct_path_to_collection()
         for field in self.url_fields:
             kwargs[field] = getattr(self, field)
-        return self._http.post(path, **kwargs)
+        return self._http.post(path, json.dumps(kwargs))
 
     def _update(self, **kwargs):
         """Update a resource in a remote Tx server."""
         path = self._construct_path_to_item()
-        return self._http.put(path, **kwargs)
+        return self._http.put(path, json.dumps(kwargs))
 
     def _delete(self, **kwargs):
         """Delete a resource from a remote Tx server."""
