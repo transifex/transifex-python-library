@@ -112,6 +112,8 @@ class BaseModel(object):
     def _update(self, **kwargs):
         """Update a resource in a remote Tx server."""
         path = self._construct_path_to_item()
+        if not kwargs:
+            return
         return self._http.put(path, json.dumps(kwargs))
 
     def _delete(self, **kwargs):
