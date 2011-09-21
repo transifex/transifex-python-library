@@ -4,7 +4,6 @@
 Resource wrapper.
 """
 
-from txlib.utils import _logger
 from txlib.api.base import BaseModel
 from txlib.api.exceptions import MissingArgumentsError
 
