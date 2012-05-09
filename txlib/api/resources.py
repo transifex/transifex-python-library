@@ -4,6 +4,8 @@
 Resource wrapper.
 """
 
+import json
+
 from txlib.api.base import BaseModel
 from txlib.api.exceptions import MissingArgumentsError
 
@@ -22,7 +24,7 @@ class Resource(BaseModel):
     ])
     write_also_fields = set([
         'slug', 'name', 'accept_translations', 'source_language',
-        'mimetype', 'content',
+        'mimetype', 'content', 'i18n_type',
     ])
     mandatory_fields = set(['slug', 'name', 'mimetype', ])
     url_fields = set(['project_slug', 'slug', ])
