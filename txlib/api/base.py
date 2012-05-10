@@ -106,7 +106,8 @@ class BaseModel(object):
         """Create a resource in the remote Tx server."""
         path = self._construct_path_to_collection()
         for field in self.url_fields:
-            kwargs[field] = getattr(self, field)
+            if field in self.mandatory_fields:
+                kwargs[field] = getattr(self, field)
         return self._http.post(path, json.dumps(kwargs))
 
     def _update(self, **kwargs):
