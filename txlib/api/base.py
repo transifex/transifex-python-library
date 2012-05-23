@@ -107,6 +107,7 @@ class BaseModel(object):
         path = self._construct_path_to_collection()
         for field in self.url_fields:
             kwargs[field] = getattr(self, field)
+        kwargs = self._clear_ro(kwargs)
         return self._http.post(path, json.dumps(kwargs))
 
     def _update(self, **kwargs):
@@ -114,6 +115,7 @@ class BaseModel(object):
         path = self._construct_path_to_item()
         if not kwargs:
             return
+        kwargs = self._clear_ro(kwargs)
         return self._http.put(path, json.dumps(kwargs))
 
     def _delete(self, **kwargs):
@@ -152,3 +154,14 @@ class BaseModel(object):
         well-defined URL path.
         """
         return '/'.join(args).replace('///', '/').replace('//', '/')
+
+    def _clear_ro(self, kwargs):
+        """
+        Remove the strictly read only fields from an argument list
+        This should be used before making a request
+        """
+        forbidden = self.read_only_fields.difference(self.write_also_fields)
+        for field in forbidden:
+            kwargs.pop(field, None)
+
+        return kwargs

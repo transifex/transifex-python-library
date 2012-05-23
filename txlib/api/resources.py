@@ -43,6 +43,7 @@ class Resource(BaseModel):
         if 'content' in kwargs:
             content = kwargs.pop('content')
             path = self._construct_path_to_source_content()
+            kwargs = self._clear_ro(kwargs)
             self._http.put(path, json.dumps({'content': content}))
         super(Resource, self)._update(**kwargs)
 
