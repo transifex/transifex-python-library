@@ -1,5 +1,9 @@
 # -*- coding: utf-8 -*-
 
+"""
+Translations wrapper.
+"""
+
 from txlib.api.base import BaseModel
 from txlib.api.exceptions import MissingArgumentsError
 

@@ -26,5 +26,5 @@ class Project(BaseModel):
         'trans_instructions', 'tags', 'maintainers', 'outsource',
         'source_language_code',
     ])
-    mandatory_fields = set(['slug', 'name', 'owner', 'source_language_code',])
+    mandatory_fields = set(['slug', 'name', 'owner', 'source_language_code', ])
     url_fields = set(['slug', ])
