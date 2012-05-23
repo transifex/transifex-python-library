@@ -13,6 +13,11 @@ try:
 except ImportError:
     install_requires.append('unittest2')
 
+try:
+    import requests
+except ImportError:
+    install_requires.append('requests')
+
 setup(
     name="txlib",
     author="Indifex Ltd.",
