@@ -157,8 +157,10 @@ class BaseModel(object):
 
     def _clear_ro(self, kwargs):
         """
-        Remove the strictly read only fields from an argument list
-        This should be used before making a request
+        Remove the strictly read only fields from an argument list.
+
+        This should be used before making a request to the transifex server
+        to avoid getting a forbidden error.
         """
         forbidden = self.read_only_fields.difference(self.write_also_fields)
         for field in forbidden:
