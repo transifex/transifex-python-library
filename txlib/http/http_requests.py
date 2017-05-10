@@ -1,8 +1,8 @@
 # -*- coding: utf-8 -*-
 
+import json
 import requests
 from txlib.utils import _logger
-from txlib.utils.imports import json
 from txlib.http.base import BaseRequest
 from txlib.http.exceptions import NoResponseError
 
@@ -105,10 +105,10 @@ class HttpRequest(BaseRequest):
 
         if res.ok:
             _logger.debug("Request was successful.")
-            return res.content
+            return res.content.decode('utf-8')
 
         if hasattr(res, 'content'):
-            _logger.debug("Response was %s:%s" % (res.status_code, res.content))
+            _logger.debug("Response was %s:%s", res.status_code, res.content)
             raise self._exception_for(res.status_code)(
                 res.content, http_code=res.status_code
             )
@@ -165,4 +165,3 @@ class HttpRequest(BaseRequest):
         """
         with open(filename, 'r') as f:
             return self._make_request(method, path, data=data, files=[f, ])
-

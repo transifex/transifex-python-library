@@ -1,9 +1,9 @@
 # -*- coding: utf-8 -*-
 
 from __future__ import with_statement
-import urlparse
+from six.moves.urllib import parse as urlparse
+from txlib.http import exceptions
 from txlib.http.auth import AnonymousAuth
-from txlib.http.exceptions import *
 from txlib.utils import _logger
 
 
@@ -11,11 +11,11 @@ class BaseRequest(object):
     """Base class for http request classes."""
 
     errors = {
-        400: RequestError,
-        401: AuthorizationError,
-        403: AuthenticationError,
-        404: NotFoundError,
-        409: ConflictError,
+        400: exceptions.RequestError,
+        401: exceptions.AuthorizationError,
+        403: exceptions.AuthenticationError,
+        404: exceptions.NotFoundError,
+        409: exceptions.ConflictError,
     }
 
     success = {
@@ -93,6 +93,6 @@ class BaseRequest(object):
         if code in self.errors:
             return self.errors[code]
         elif 500 <= code < 599:
-            return RemoteServerError
+            return exceptions.RemoteServerError
         else:
-            return UnknownError
+            return exceptions.UnknownError

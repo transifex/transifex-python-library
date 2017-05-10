@@ -1,0 +1,30 @@
+version: 2
+jobs:
+  build:
+    docker:
+      - image: transifex/pyenv-tox
+    working_directory: /home/debian/transifex-python-library
+    steps:
+      - checkout
+
+      - restore_cache:
+          keys:
+            - txlib-{{ checksum "circle.yml" }}-{{ checksum "setup.py" }}
+            - txlib-{{ checksum "circle.yml" }}
+            - txlib-
+
+      - run: |
+          mkdir -p test-results
+          tox -- --cov-report xml --junitxml=test-results/junit.xml
+
+      - save_cache:
+          key: txlib-{{ checksum "circle.yml" }}-{{ checksum "setup.py" }}
+          paths:
+            - ~/.cache/pip
+            - .tox
+
+      - store_artifacts:
+          path: test-results/
+
+      - store_test_results:
+          path: test-results/

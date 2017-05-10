@@ -2,8 +2,9 @@
 """
 Authentication related module.
 """
+from __future__ import unicode_literals
 
-import base64
+from requests.auth import HTTPBasicAuth
 
 
 class AuthInfo(object):
@@ -61,26 +62,16 @@ class BasicAuth(AuthInfo):
     def populate_request_data(self, request_args):
         """Add the authentication info to the supplied dictionary.
 
-        We add the `Authorization` header to the arguments of the request
-        (without removing any).
+        We use the `requests.HTTPBasicAuth` class as the `auth` param.
 
         Args:
             `request_args`: The arguments that will be passed to the request.
         Returns:
             The updated arguments for the request.
         """
-        headers = request_args.get('headers', {})
-        headers.update(self._create_auth_header())
-        request_args['headers'] = headers
+        request_args['auth'] = HTTPBasicAuth(
+            self._username, self._password)
         return request_args
-
-    def _create_auth_header(self):
-        """Create the header for basic authentication."""
-        auth_string = base64.encodestring(
-            '%s:%s' % (self._username, self._password)
-        ).replace('\n', '')
-        auth_value = "Basic %s" % auth_string
-        return {'Authorization': auth_value}
 
 
 class AnonymousAuth(AuthInfo):

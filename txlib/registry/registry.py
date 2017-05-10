@@ -1,8 +1,6 @@
 # -*- coding: utf-8 -*-
 
 from txlib.utils import _logger
-from txlib.http.auth import AnonymousAuth
-from txlib.http.http_requests import HttpRequest
 
 
 class _Registry(object):

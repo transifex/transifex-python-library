@@ -2,9 +2,9 @@
 """
 Tests for requests.
 """
-
-from txlib.utils import json
-from txlib.utils.imports import unittest
+import json
+import responses
+import unittest
 from txlib.http.base import BaseRequest
 from txlib.http.http_requests import HttpRequest
 from txlib.http.auth import AnonymousAuth, BasicAuth
@@ -38,7 +38,6 @@ class TestBaseRequest(unittest.TestCase):
         b = BaseRequest(host)
         self.assertEquals('https://' + host, b._hostname)
 
-
     def test_construct_full_url(self):
         """Test _construct_full_url method."""
         # normal case
@@ -66,8 +65,8 @@ class TestBaseRequest(unittest.TestCase):
         self.assertIn(path, url)
         self.assertEquals(
             len(url),
-            len(b.default_scheme) + len('://') + len(host) + len('/') +\
-                len(path)
+            len(b.default_scheme) + len('://') + len(host) + len('/') +
+            len(path)
         )
 
         # port is set
@@ -91,13 +90,15 @@ class TestBaseRequest(unittest.TestCase):
     def test_error_messages(self):
         """Test the error messages of the requests."""
         b = BaseRequest('www.example.com')
-        for code, msg in b.error_messages.iteritems():
+        for code in b.error_messages:
+            msg = b.error_messages[code]
             self.assertIn(msg, b._error_message(code, msg))
 
     def test_http_exceptions(self):
         """Test the exceptions raised for each HTTP 4xx code."""
         b = BaseRequest('www.example.com')
-        for code, klass in b.errors.iteritems():
+        for code in b.errors:
+            klass = b.errors[code]
             self.assertIs(b._exception_for(code), klass)
         self.assertIs(b._exception_for(499), UnknownError)
         for code in (500, 501, 502, ):
@@ -119,58 +120,102 @@ class TestHttpRequest(unittest.TestCase):
         cls.password = 'txlib'
         cls.auth = BasicAuth(cls.username, cls.password)
 
+    @responses.activate
     def test_anonymous_requests(self):
         """Test anonymous requests.
 
         They should all fail, since transifex currently does not allow
         anonymous access to the API.
         """
+        responses.add(responses.GET,
+                      "{}/api/2/projects/".format(self.hostname),
+                      status=401)
         auth = AnonymousAuth()
         h = HttpRequest(self.hostname, auth=auth)
         self.assertRaises(AuthorizationError, h.get, '/api/2/projects/')
 
+    @responses.activate
     def test_wrong_auth(self):
         """Test response for requests with wrong authentication info."""
+        responses.add(responses.GET,
+                      "{}/api/2/projects/".format(self.hostname),
+                      status=401)
         auth = BasicAuth(self.username, 'wrong')
         h = HttpRequest(self.hostname, auth=auth)
         self.assertRaises(AuthorizationError, h.get, '/api/2/projects/')
 
+    @responses.activate
     def test_auth(self):
         """Test authenticated requests."""
+        responses.add(responses.GET,
+                      "{}/api/2/projects/".format(self.hostname),
+                      body='{}', content_type="application/json")
         path = '/api/2/projects/'
         h = HttpRequest(self.hostname, auth=self.auth)
-        res = h.get(path)       # Succeeds!
+        h.get(path)       # Succeeds!
 
-    def test_script(self):
+    @responses.activate
+    def test_not_found(self):
         h = HttpRequest(self.hostname, auth=self.auth)
+        responses.add(responses.GET,
+                      "{}/api/2/txlib/".format(self.hostname),
+                      status=404)
 
         # get a project that does not exist
         self.assertRaises(NotFoundError, h.get, '/api/2/txlib/')
 
-        # create a project
-        data = json.dumps(dict(slug='txlib', name='Txlib project'))
-        path = '/api/2/projects/'
-        h.post(path, data=data)
+    def test_create(self):
+        with responses.RequestsMock() as rsps:
+            h = HttpRequest(self.hostname, auth=self.auth)
+            # create a project
+            path = '/api/2/projects/'
+            rsps.add(responses.POST,
+                     "{}/api/2/projects/".format(self.hostname),
+                     status=201)
+            rsps.add(responses.POST,
+                     "{}/api/2/projects/".format(self.hostname),
+                     status=409)
+            data = json.dumps(dict(slug='txlib', name='Txlib project'))
+            h.post(path, data=data)
+            self.assertRaises(ConflictError, h.post, path, data=data)
 
-        # creating the same project results in an error raised.
-        self.assertRaises(ConflictError, h.post, path, data=data)
+    def test_update(self):
+        with responses.RequestsMock() as rsps:
+            rsps.add(responses.PUT,
+                     "{}/api/2/project/txlib/".format(self.hostname),
+                     status=400)
+            rsps.add(responses.GET,
+                     "{}/api/2/project/txlib/?details".format(self.hostname),
+                     json={"anyone_submit": False}, match_querystring=True,
+                     status=200)
+            rsps.add(responses.PUT,
+                     "{}/api/2/project/txlib/".format(self.hostname),
+                     json={"anyone_submit": True},
+                     status=200)
+            rsps.add(responses.GET,
+                     "{}/api/2/project/txlib/?details".format(self.hostname),
+                     json={"anyone_submit": True}, match_querystring=True,
+                     status=200)
+            rsps.add(responses.DELETE,
+                     "{}/api/2/project/txlib/".format(self.hostname),
+                     status=200)
+            h = HttpRequest(self.hostname, auth=self.auth)
+            # Using a non-existent attribute for projects
+            data = json.dumps(dict(name='New name', anyone_submitt=True))
+            path = '/api/2/project/txlib/'
+            self.assertRaises(RequestError, h.put, path, data)
 
-        # Using a non-existent attribute for projects
-        data = json.dumps(dict(name='New name', anyone_submitt=True))
-        path = '/api/2/project/txlib/'
-        self.assertRaises(RequestError, h.put, path, data)
+            # make sure the field has the default value
+            p = h.get(path + '?details')
+            self.assertFalse(p['anyone_submit'])
 
-        # make sure the field has the default value
-        p = h.get(path + '?details')
-        self.assertFalse(p['anyone_submit'])
+            # update the details of the project
+            data = json.dumps(dict(name='New name',  anyone_submit=True))
+            h.put(path, data)
 
-        # update the details of the project
-        data = json.dumps(dict(name='New name',  anyone_submit=True))
-        h.put(path, data)
+            # make sure the change has been saved
+            p = h.get(path + '?details')
+            self.assertTrue(p['anyone_submit'])
 
-        # make sure the change has been saved
-        p = h.get(path + '?details')
-        self.assertTrue(p['anyone_submit'])
-
-        # delete the project
-        h.delete(path)
+            # delete the project
+            h.delete(path)

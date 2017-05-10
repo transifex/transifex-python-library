@@ -2,3 +2,7 @@
 *~
 .~
 *.egg-info
+.cache/
+.coverage
+.tox/
+test-results

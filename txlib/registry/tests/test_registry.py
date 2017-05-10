@@ -1,7 +1,6 @@
 # -*- coding: utf-8 -*-
+import unittest
 
-
-from txlib.utils.imports import unittest
 from txlib.registry.registry import _Registry
 from txlib.http.auth import AnonymousAuth, BasicAuth
 

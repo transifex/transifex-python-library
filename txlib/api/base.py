@@ -1,7 +1,7 @@
 # -*- coding: utf-8 -*-
+import json
 
 from txlib.utils import _logger
-from txlib.utils.imports import json
 from txlib.registry import registry
 
 
@@ -16,7 +16,7 @@ class BaseModel(object):
     an attribute that has no value.
     """
 
-    _prefix = '/api/2/'
+    _prefix = ''
     _path_to_collection = ''    # shouldn't start with a slash
     _path_to_item = ''          # shouldn't start with a slash
 
@@ -69,7 +69,7 @@ class BaseModel(object):
 
     def __setattr__(self, name, value):
         """Set the value of a field."""
-        if not '_is_initialized' in self.__dict__ or name in self.__dict__:
+        if '_is_initialized' not in self.__dict__ or name in self.__dict__:
             return super(BaseModel, self).__setattr__(name, value)
         elif name in self.write_also_fields:
             self._modified_fields[name] = value
@@ -131,7 +131,7 @@ class BaseModel(object):
 
     @property
     def url_parameters(self):
-        """Create a dictionary of the parameters used in URLs for this model."""
+        """Create a dictionary of parameters used in URLs for this model."""
         url_fields = {}
         for field in self.url_fields:
             url_fields[field] = getattr(self, field)
@@ -152,3 +152,8 @@ class BaseModel(object):
         well-defined URL path.
         """
         return '/'.join(args).replace('///', '/').replace('//', '/')
+
+
+class LegacyModel(BaseModel):
+    """Base class for Tx models in the old v2 API."""
+    _prefix = '/api/2/'

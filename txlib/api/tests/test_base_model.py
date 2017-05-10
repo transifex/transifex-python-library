@@ -1,6 +1,5 @@
 # -*- coding: utf-8 -*-
-
-from txlib.utils.imports import unittest
+import unittest
 from txlib.api.base import BaseModel
 
 
@@ -26,4 +25,3 @@ class TestBaseModel(unittest.TestCase):
         path = b._join_subpaths('/api/', '2/', 'projects/')
         self.assertEquals(path.count('/'), 4)
         self.assertEquals(path, correct_path)
-
