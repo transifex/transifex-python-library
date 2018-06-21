@@ -7,7 +7,6 @@ Resource wrapper.
 import json
 
 from txlib.api.base import BaseModel
-from txlib.api.exceptions import MissingArgumentsError
 
 
 class Resource(BaseModel):
@@ -17,26 +16,18 @@ class Resource(BaseModel):
     _path_to_item = 'project/%(project_slug)s/resource/%(slug)s/?details'
     _path_to_source_language = 'project/%(project_slug)s/resource/%(slug)s/content/'
 
-    read_only_fields = set([
-        'slug', 'name', 'created', 'available_languages', 'mimetype',
-        'source_language_code', 'project_slug', 'wordcount', 'total_entities',
-        'accept_translations', 'last_update',
-    ])
-    write_also_fields = set([
+    writable_fields = {
         'slug', 'name', 'accept_translations', 'source_language',
         'mimetype', 'content', 'i18n_type',
-    ])
-    mandatory_fields = set(['slug', 'name', 'mimetype', ])
-    url_fields = set(['project_slug', 'slug', ])
+    }
+    url_fields = {'project_slug', 'slug'}
 
-    def __getattr__(self, name):
-        """Make separate handling of the content of a resource."""
-        if name == 'content':
-            path = self._construct_path_to_source_content()
-            res = self._http.get(path)
-            self._populated_fields['content'] = res['content']
-            return res['content']
-        return super(Resource, self).__getattr__(name)
+    def retrieve_content(self):
+        """Retrieve the content of a resource."""
+        path = self._construct_path_to_source_content()
+        res = self._http.get(path)
+        self._populated_fields['content'] = res['content']
+        return res['content']
 
     def _update(self, **kwargs):
         """Use separate URL for updating the source file."""
@@ -54,3 +45,6 @@ class Resource(BaseModel):
     def path_to_source_content_template(self):
         """Return the path to the source language content."""
         return self._join_subpaths(self._prefix, self._path_to_source_language)
+
+    def __str__(self):
+        return '[Resource slug={}]'.format(self.slug)

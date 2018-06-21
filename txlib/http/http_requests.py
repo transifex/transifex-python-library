@@ -10,9 +10,7 @@ from txlib.http.exceptions import NoResponseError
 class HttpRequest(BaseRequest):
     """Basic http requests handler.
 
-    This class can handle both http and https requests. However, since
-    it uses the `requests` module (which in turn uses `urllib2`), it does
-    not verify the SSL certificate in case of https.
+    This class can handle both http and https requests.
     """
 
     def get(self, path):
@@ -106,7 +104,6 @@ class HttpRequest(BaseRequest):
         if res.ok:
             _logger.debug("Request was successful.")
             return res.content.decode('utf-8')
-
         if hasattr(res, 'content'):
             _logger.debug("Response was %s:%s", res.status_code, res.content)
             raise self._exception_for(res.status_code)(

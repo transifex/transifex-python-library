@@ -4,7 +4,7 @@ from txlib.api.base import BaseModel
 
 
 class TestBaseModel():
-    """Test the base model for the Tx model wrappers."""
+    """Test the base model for the Transifex model wrappers."""
 
     def test_join_subpaths(self):
         """Test that subpaths are joined correctly."""

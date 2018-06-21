@@ -14,17 +14,13 @@ class Project(BaseModel):
     _path_to_collection = 'projects/'
     _path_to_item = 'project/%(slug)s/?details'
 
-    read_only_fields = set([
-        'slug', 'name', 'description', 'long_description', 'homepage', 'feed',
-        'created', 'anyone_submit', 'bug_tracker', 'trans_instructions',
-        'tags', 'maintainers', 'outsource', 'owner', 'resources',
-        'source_language_code',
-    ])
-    write_also_fields = set([
+    writable_fields = {
         'slug', 'name', 'description', 'long_description', 'private',
         'homepage', 'feed', 'anyone_submit', 'hidden', 'bug_tracker',
         'trans_instructions', 'tags', 'maintainers', 'outsource',
         'source_language_code',
-    ])
-    mandatory_fields = set(['slug', 'name', 'owner', 'source_language_code',])
-    url_fields = set(['slug', ])
+    }
+    url_fields = {'slug'}
+
+    def __str__(self):
+        return '[Project slug={}]'.format(self.slug)

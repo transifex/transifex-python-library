@@ -9,7 +9,5 @@ class Translation(BaseModel):
     _path_to_item = 'project/%(project_slug)s/resource/%(slug)s/translation/%(lang)s'  # noqa
     _path_to_collection = None
 
-    read_only_fields = set(['content', ])
-    write_also_fields = set(['content', ])
-    mandatory_fields = set(['content', ])
-    url_fields = set(['project_slug', 'slug', 'lang', ])
+    writable_fields = {'content'}
+    url_fields = {'project_slug', 'slug', 'lang'}
