@@ -42,3 +42,18 @@ class TestRegistry():
         assert len(self.r.responsibilities.keys()) == 3
         assert self.r.auth_class == BasicAuth
         assert self.r.newnew == 'newnew'
+
+    def test_remove(self):
+        """Test the removal of a responsibility object."""
+        self.r.setup({'one': 1, 'two': 2, 'three': 3})
+        assert len(self.r.responsibilities.keys()) == 3
+
+        self.r.remove('one')
+        assert len(self.r.responsibilities.keys()) == 2
+
+        self.r.remove('two')
+        assert len(self.r.responsibilities.keys()) == 1
+
+        self.r.remove('three')
+        assert len(self.r.responsibilities.keys()) == 0
+

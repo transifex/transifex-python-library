@@ -10,7 +10,7 @@ from txlib.http.exceptions import NoResponseError
 class HttpRequest(BaseRequest):
     """Basic http requests handler.
 
-    This class can handle both http and https requests.
+    This class can handle both HTTP and HTTPS requests.
     """
 
     def get(self, path):
@@ -104,13 +104,14 @@ class HttpRequest(BaseRequest):
         if res.ok:
             _logger.debug("Request was successful.")
             return res.content.decode('utf-8')
+
         if hasattr(res, 'content'):
             _logger.debug("Response was %s:%s", res.status_code, res.content)
             raise self._exception_for(res.status_code)(
                 res.content, http_code=res.status_code
             )
         else:
-            msg = "No response from the  URL %s" % res.request.url
+            msg = "No response from URL: %s" % res.request.url
             _logger.error(msg)
             raise NoResponseError(msg)
 

@@ -29,3 +29,17 @@ class _Registry(object):
             `responsibilities`: A dictionary of responsibilities to define.
         """
         self.responsibilities.update(responsibilities)
+
+    def remove(self, key):
+        """Remove the responsibility with the given key.
+
+        Args:
+            `key`: The name of the responsibility to remove
+        Returns:
+            True if found, False otherwise
+        """
+        try:
+            del self.responsibilities[key]
+            return True
+        except KeyError:
+            return False

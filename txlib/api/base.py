@@ -50,6 +50,12 @@ from txlib.utils import _logger
 from txlib.registry import registry
 
 
+# Used for designating what type of attribute is missing
+ATTR_TYPE_READ = 'read'
+ATTR_TYPE_WRITE = 'write'
+ATTR_TYPE_URL = 'url'
+
+
 class BaseModel(object):
     """Base class for Transifex models.
 
@@ -92,7 +98,7 @@ class BaseModel(object):
         """Retrieve an object by making a GET request to Transifex.
 
         Each value in `kwargs` that corresponds to a field
-        defined in `self.url_fields` will be used in the URL pth
+        defined in `self.url_fields` will be used in the URL path
         of the request, so that a particular entry of this model
         is identified and retrieved.
 
@@ -133,7 +139,7 @@ class BaseModel(object):
             if field in self.url_fields:
                 setattr(self, field, url_values[field])
             else:
-                self._handle_wrong_field(field)
+                self._handle_wrong_field(field, ATTR_TYPE_URL)
 
         # From now on only, only specific attributes can be set
         # on this object:
@@ -155,7 +161,7 @@ class BaseModel(object):
             return self._populated_fields[name]
 
         else:
-            self._handle_wrong_field(name)
+            self._handle_wrong_field(name, ATTR_TYPE_READ)
 
     def __setattr__(self, name, value):
         """Set the value of a field.
@@ -177,7 +183,7 @@ class BaseModel(object):
             self._modified_fields[name] = value
 
         else:
-            self._handle_wrong_field(name)
+            self._handle_wrong_field(name, ATTR_TYPE_WRITE)
 
     def save(self, **fields):
         """Save the instance to the remote Transifex server.
@@ -197,7 +203,7 @@ class BaseModel(object):
             if field in self.writable_fields:
                 setattr(self, field, fields[field])
             else:
-                self._handle_wrong_field(field)
+                self._handle_wrong_field(field, ATTR_TYPE_WRITE)
 
         if self._populated_fields:
             self._update(**self._modified_fields)
@@ -274,7 +280,7 @@ class BaseModel(object):
         """
         return '/'.join(args).replace('///', '/').replace('//', '/')
 
-    def _handle_wrong_field(self, field_name):
+    def _handle_wrong_field(self, field_name, field_type):
         """Raise an exception whenever an invalid attribute with
         the given name was attempted to be set to or retrieved from
         this model class.
@@ -283,7 +289,22 @@ class BaseModel(object):
 
         Also adds an entry to the logs.
         """
-        msg = "%s has no attribute %s" % (self.__class__.__name__, field_name)
+        if field_type == ATTR_TYPE_READ:
+            field_type = 'readable'
+        elif field_type == ATTR_TYPE_WRITE:
+            field_type = 'writable'
+        elif field_type == ATTR_TYPE_URL:
+            field_type = 'URL'
+        else:
+            raise AttributeError('Invalid attribute type: {}'.format(
+                field_type
+            ))
+
+        msg = '{} has no {} attribute "{}"'.format(
+            self.__class__.__name__,
+            field_type,
+            field_name
+        )
         _logger.error(msg)
         raise AttributeError(msg)
 
