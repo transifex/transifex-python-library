@@ -39,10 +39,10 @@ class Resource(BaseModel):
 
     def _construct_path_to_source_content(self):
         """Construct the path to the source content for an actual resource."""
-        return self.path_to_source_content_template % self.url_parameters
+        return self.get_path_to_source_content_template() % \
+               self.get_url_parameters()
 
-    @property
-    def path_to_source_content_template(self):
+    def get_path_to_source_content_template(self):
         """Return the path to the source language content."""
         return self._join_subpaths(self._prefix, self._path_to_source_language)
 

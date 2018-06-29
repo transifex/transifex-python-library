@@ -41,6 +41,18 @@ examples in the README.
 >>> obj.param1 = '...'
 >>> obj.param2 = '...'
 >>> obj.save()
+
+
+WARNING:
+__getattr__ and @property do not mix well and at some point all @property
+decorators were removed from BaseModel.
+
+This note is here to warn developers to not add any properties in the future.
+
+The issue is that, if a property raises an AttributeError, Python
+(__getattribute__()) falls back to using __getattr__(). The problem is
+that the traceback is lost, which makes it extremely hard to debug,
+since the actual exception raised isn't shown anywhere.
 """
 
 
@@ -250,27 +262,25 @@ class BaseModel(object):
 
     def _construct_path_to_collection(self):
         """Construct the path to an actual collection."""
-        return self.path_to_collection_template % self.url_parameters
+        return self.get_path_to_collection_template() % \
+               self.get_url_parameters()
 
     def _construct_path_to_item(self):
         """Construct the path to an actual item."""
-        return self.path_to_item_template % self.url_parameters
+        return self.get_path_to_item_template() % self.get_url_parameters()
 
-    @property
-    def url_parameters(self):
+    def get_url_parameters(self):
         """Create a dictionary of parameters used in URLs for this model."""
         url_fields = {}
         for field in self.url_fields:
             url_fields[field] = getattr(self, field)
         return url_fields
 
-    @property
-    def path_to_collection_template(self):
+    def get_path_to_collection_template(self):
         """The URL to access the collection of the model."""
         return self._join_subpaths(self._prefix, self._path_to_collection)
 
-    @property
-    def path_to_item_template(self):
+    def get_path_to_item_template(self):
         """The URL to access a specific item of the model."""
         return self._join_subpaths(self._prefix, self._path_to_item)
 
