@@ -115,6 +115,8 @@ class BaseModel(object):
         is identified and retrieved.
 
         Raises:
+            AttributeError: if not all values for parameters in `url_fields`
+                are passed as kwargs
             txlib.http.exceptions.NotFoundError: if the object with these
                 attributes is not found on the remote server
             txlib.http.exceptions.ServerError subclass: depending on
@@ -126,7 +128,10 @@ class BaseModel(object):
         """
         fields = {}
         for field in cls.url_fields:
-            fields[field] = kwargs.pop(field, None)
+            value = kwargs.pop(field, None)
+            if value is None:
+                cls._handle_wrong_field(field, ATTR_TYPE_URL)
+            fields[field] = value
 
         # Create an instance of the model class and make the GET request
         model = cls(**fields)
@@ -141,6 +146,9 @@ class BaseModel(object):
 
         Args:
             prefix: The prefix of the urls.
+        Raises:
+            AttributeError: if not all values for parameters in `url_fields`
+                are passed
         """
         self._http = registry.http_handler
         self._prefix = prefix
@@ -164,7 +172,8 @@ class BaseModel(object):
 
         Looks in `self._modified_fields` and `self._populated_fields`.
 
-        Raises an AttributeError if the requested attribute does not exist.
+        Raises:
+            AttributeError: if the requested attribute does not exist
         """
         if name in self._modified_fields:
             return self._modified_fields[name]
@@ -186,6 +195,10 @@ class BaseModel(object):
 
         For case (a), the attribute is saved directly on this object
         For case (b), the attribute is saved in `self.writable_fields`
+
+        Raises:
+            AttributeError: if a given field is not included in
+                `self.writable_fields`,
         """
         # If __init__() hasn't finished yet, accept anything
         if ('_is_initialized' not in self.__dict__) or (name in self.__dict__):
@@ -262,8 +275,8 @@ class BaseModel(object):
 
     def _construct_path_to_collection(self):
         """Construct the path to an actual collection."""
-        return self.get_path_to_collection_template() % \
-               self.get_url_parameters()
+        template = self.get_path_to_collection_template()  # flake8 fix
+        return template % self.get_url_parameters()
 
     def _construct_path_to_item(self):
         """Construct the path to an actual item."""
@@ -290,7 +303,8 @@ class BaseModel(object):
         """
         return '/'.join(args).replace('///', '/').replace('//', '/')
 
-    def _handle_wrong_field(self, field_name, field_type):
+    @classmethod
+    def _handle_wrong_field(cls, field_name, field_type):
         """Raise an exception whenever an invalid attribute with
         the given name was attempted to be set to or retrieved from
         this model class.
@@ -311,12 +325,13 @@ class BaseModel(object):
             ))
 
         msg = '{} has no {} attribute "{}"'.format(
-            self.__class__.__name__,
+            cls.__name__,
             field_type,
             field_name
         )
         _logger.error(msg)
         raise AttributeError(msg)
+
 
 class LegacyModel(BaseModel):
     """Base class for Transifex models in the old v2 API."""

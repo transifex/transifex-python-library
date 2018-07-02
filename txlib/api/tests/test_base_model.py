@@ -3,8 +3,16 @@ import pytest
 
 from txlib.api.base import BaseModel
 from txlib.api.tests.utils import clean_registry, get_mock_response
-from txlib.http.exceptions import NoResponseError
 from txlib.tests.compat import patch
+
+
+@pytest.fixture(scope='module', autouse=True)
+def auto_clean_registry():
+    """Run the test and the remove the `http_handler` entry from
+    the registry."""
+    yield
+    clean_registry()
+
 
 class DummyModel(BaseModel):
     """A dummy class useful for testing behaviour that requires
@@ -15,10 +23,6 @@ class DummyModel(BaseModel):
 
 class TestBaseModel():
     """Test the base model for the Transifex model wrappers."""
-
-    @pytest.fixture(autouse=True)
-    def auto_clean_registry(self, clean_registry):
-        pass
 
     def test_join_subpaths(self):
         """Test that subpaths are joined correctly."""
@@ -63,7 +67,7 @@ class TestBaseModel():
         mock_request.return_value = get_mock_response(
             200, '{"id": 100, "slug": "slug"}'
         )
-        obj = DummyModel.get()
+        obj = DummyModel.get(slug='slug')
 
         mock_request.return_value = get_mock_response(
             200, '{"id": 100, "slug": "slug", '
@@ -83,7 +87,7 @@ class TestBaseModel():
         mock_request.return_value = get_mock_response(
             200, '{"id": 100, "slug": "slug"}'
         )
-        obj = DummyModel.get()
+        obj = DummyModel.get(slug='slug')
         obj.save()
 
         # The mock request should only have been called once,
@@ -96,7 +100,7 @@ class TestBaseModel():
         mock_request.return_value = get_mock_response(
             200, '{"id": 100, "slug": "slug"}'
         )
-        obj = DummyModel.get()
+        obj = DummyModel.get(slug='slug')
 
         mock_request.return_value = get_mock_response(
             200, '{}'
@@ -138,10 +142,16 @@ class TestBaseModel():
         assert 'BaseModel has no URL attribute "invalid"' == \
                excinfo.value.args[0]
 
+    def test_exception_if_omitting_url_field(self):
+        with pytest.raises(AttributeError) as excinfo:
+            DummyModel.get()
+        assert 'DummyModel has no URL attribute "slug"' == \
+               excinfo.value.args[0]
+
     def test_exception_if_retrieving_invalid_attribute(self):
         b = DummyModel(slug='slug')
         with pytest.raises(AttributeError) as excinfo:
-            _ = b.invalid
+            b.invalid
         assert 'DummyModel has no readable attribute "invalid"' == \
                excinfo.value.args[0]
 

@@ -5,7 +5,6 @@ Project wrapper.
 """
 
 from txlib.api.base import BaseModel
-from txlib.api.exceptions import MissingArgumentsError
 
 
 class Project(BaseModel):

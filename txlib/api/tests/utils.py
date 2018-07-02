@@ -1,5 +1,3 @@
-import pytest
-
 from txlib.http.http_requests import HttpRequest
 from txlib.registry import registry
 
@@ -40,10 +38,7 @@ def get_mock_response(status_code, content):
     return TestResponse(status_code, content.encode('utf-8'))
 
 
-@pytest.fixture
 def clean_registry():
     """Run the test and the remove the `http_handler` entry from
     the registry."""
-    yield
     registry.remove('http_handler')
-

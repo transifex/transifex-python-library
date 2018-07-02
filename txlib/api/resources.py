@@ -14,7 +14,8 @@ class Resource(BaseModel):
 
     _path_to_collection = 'project/%(project_slug)s/resources/'
     _path_to_item = 'project/%(project_slug)s/resource/%(slug)s/?details'
-    _path_to_source_language = 'project/%(project_slug)s/resource/%(slug)s/content/'
+    _path_to_source_language = 'project/%(project_slug)s/resource/' \
+                               '%(slug)s/content/'
 
     writable_fields = {
         'slug', 'name', 'accept_translations', 'source_language',
@@ -39,8 +40,8 @@ class Resource(BaseModel):
 
     def _construct_path_to_source_content(self):
         """Construct the path to the source content for an actual resource."""
-        return self.get_path_to_source_content_template() % \
-               self.get_url_parameters()
+        template = self.get_path_to_source_content_template()  # flake8 fix
+        return template % self.get_url_parameters()
 
     def get_path_to_source_content_template(self):
         """Return the path to the source language content."""

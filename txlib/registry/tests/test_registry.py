@@ -56,4 +56,3 @@ class TestRegistry():
 
         self.r.remove('three')
         assert len(self.r.responsibilities.keys()) == 0
-
