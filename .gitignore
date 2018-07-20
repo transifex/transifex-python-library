@@ -3,6 +3,7 @@
 .~
 *.egg-info
 .cache/
+.pytest_cache/
 .coverage
 .tox/
 test-results
