@@ -97,7 +97,37 @@ do the following:
     r.content = '...'
     r.save()
 
+
 Translations
 ~~~~~~~~~~~~
 
-TODO
+Get translation
+^^^^^^^^^^^^^^^
+.. code:: python
+
+    from txlib.api.translations import Translation
+    from txlib.http.exceptions import NotFoundError, ServerError
+
+    try:
+        t = Translation.get(project_slug='project_slug', slug='resource_slug', lang='translation_language')
+        print(t.lang) # 'translation_language'
+    except NotFoundError:
+        print('Translation not found')
+    except ServerError as e:
+        print('Exception while retrieving translation: {}'.format(e))
+
+
+Create/update translation
+^^^^^^^^^^^^^^^^^^^^^^^^^
+.. code:: python
+
+    from txlib.api.translations import Translation
+    from txlib.http.exceptions import NotFoundError, ServerError
+
+    try:
+        t = Translation(
+            project_slug=project_slug, slug=resource_slug, lang=language_code
+        )
+        t.save(content=content)
+    except ServerError as e:
+        print('Exception while retrieving translation: {}'.format(e))
