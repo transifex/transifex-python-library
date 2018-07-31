@@ -19,7 +19,8 @@ class Resource(BaseModel):
 
     writable_fields = {
         'slug', 'name', 'accept_translations', 'source_language',
-        'mimetype', 'content', 'i18n_type',
+        'mimetype', 'content', 'i18n_type', 'categories', 'category',
+        'metadata',
     }
     url_fields = {'project_slug', 'slug'}
 
