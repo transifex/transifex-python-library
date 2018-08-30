@@ -117,7 +117,9 @@ class TestHttpRequest():
         self.hostname = 'http://127.0.0.1:8000'
         self.username = 'txlib'
         self.password = 'txlib'
+        self.headers = {'header-1': 'value-1', 'header-2': 'value-2'}
         self.auth = BasicAuth(self.username, self.password)
+        self.auth_with_headers = BasicAuth(self.username, self.password, self.headers)
 
     @responses.activate
     def test_anonymous_requests(self):
@@ -148,12 +150,31 @@ class TestHttpRequest():
     @responses.activate
     def test_auth(self):
         """Test authenticated requests."""
-        responses.add(responses.GET,
-                      "{}/api/2/projects/".format(self.hostname),
-                      body='{}', content_type="application/json")
-        path = '/api/2/projects/'
-        h = HttpRequest(self.hostname, auth=self.auth)
-        h.get(path)       # Succeeds!
+        with responses.RequestsMock() as rsps:
+            rsps.add(responses.GET,
+                          "{}/api/2/projects/".format(self.hostname),
+                          body='{}', content_type="application/json")
+            path = '/api/2/projects/'
+            req = HttpRequest(self.hostname, auth=self.auth)
+            req.get(path)       # Succeeds!
+            # Assert that custom headers do not exist in the request
+            for header, value in self.headers.items():
+                with pytest.raises(KeyError):
+                    assert rsps.calls[0][0].headers[header] == value
+
+    @responses.activate
+    def test_auth_with_headers(self):
+        """Test authenticated requests with custom headers."""
+        with responses.RequestsMock() as rsps:
+            rsps.add(responses.GET,
+                          "{}/api/2/projects/".format(self.hostname),
+                          body='{}', content_type="application/json")
+            path = '/api/2/projects/'
+            req = HttpRequest(self.hostname, auth=self.auth_with_headers)
+            req.get(path)
+            # Assert that cusotm headers have been added to the request
+            for header, value in self.headers.items():
+                assert rsps.calls[0][0].headers[header] == value
 
     @responses.activate
     def test_not_found(self):

@@ -99,6 +99,11 @@ class HttpRequest(BaseRequest):
         _logger.debug("URL for request is %s" % url)
         self._auth_info.populate_request_data(kwargs)
         _logger.debug("The arguments are %s" % kwargs)
+
+        # Add custom headers for the request
+        if self._auth_info._headers:
+            kwargs.setdefault('headers', {}).update(self._auth_info._headers)
+
         res = requests.request(method, url, data=data, **kwargs)
 
         if res.ok:
