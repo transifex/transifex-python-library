@@ -2,6 +2,7 @@
 
 import json
 import requests
+from io import BytesIO
 from txlib.utils import _logger
 from txlib.http.base import BaseRequest
 from txlib.http.exceptions import NoResponseError
@@ -25,7 +26,7 @@ class HttpRequest(BaseRequest):
         """
         return json.loads(self._make_request('GET', path))
 
-    def post(self, path, data, filename=None):
+    def post(self, path, data, content=None):
         """Make a POST request.
 
         If a `filename` is not specified, then the data must already be
@@ -38,15 +39,15 @@ class HttpRequest(BaseRequest):
         Args:
             `path`: The path to the resource.
             `data`: The data to send. The data must already be JSON-encoded.
-            `filename`: The filename of the file to send.
+            `content`: The bytes (binary form) of the content to send.
         Returns:
             The content of the response.
         Raises:
             An exception depending on the HTTP status code of the response.
         """
-        return self._send('POST', path, data, filename)
+        return self._send('POST', path, data, content)
 
-    def put(self, path, data, filename=None):
+    def put(self, path, data, content=None):
         """Make a PUT request.
 
         If a `filename` is not specified, then the data must already be
@@ -59,13 +60,13 @@ class HttpRequest(BaseRequest):
         Args:
             `path`: The path to the resource.
             `data`: The data to send. The data must already be JSON-encoded.
-            `filename`: The filename of the file to send.
+            `content`: The bytes (binary form) of the content to send.
         Returns:
             The content of the response.
         Raises:
             An exception depending on the HTTP status code of the response.
         """
-        return self._send('PUT', path, data, filename)
+        return self._send('PUT', path, data, content)
 
     def delete(self, path):
         """Make a DELETE request.
@@ -120,23 +121,23 @@ class HttpRequest(BaseRequest):
             _logger.error(msg)
             raise NoResponseError(msg)
 
-    def _send(self, method, path, data, filename):
+    def _send(self, method, path, data, content):
         """Send data to a remote server, either with a POST or a PUT request.
 
         Args:
             `method`: The method (POST or PUT) to use.
             `path`: The path to the resource.
             `data`: The data to send.
-            `filename`: The filename of the file to send (if any).
+            `content`: The bytes (binary form) of the content to send.
         Returns:
             The content of the response.
         Raises:
             An exception depending on the HTTP status code of the response.
         """
-        if filename is None:
+        if content is None:
             return self._send_json(method, path, data)
         else:
-            return self._send_file(method, path, data, filename)
+            return self._send_file(method, path, data, content)
 
     def _send_json(self, method, path, data):
         """Make a application/json request.
@@ -153,18 +154,20 @@ class HttpRequest(BaseRequest):
         headers = {'Content-type': 'application/json'}
         return self._make_request(method, path, data=data, headers=headers)
 
-    def _send_file(self, method, path, data, filename):
+    def _send_file(self, method, path, data, content):
         """Make a multipart/form-encoded request.
+
+        The content to send is opened in binary mode to report correct byte length.
 
         Args:
             `method`: The method of the request (POST or PUT).
             `path`: The path to the resource.
             `data`: The JSON-encoded data.
-            `filename`: The filename of the file to send.
+            `content`: The bytes (binary form) of the content to send.
         Returns:
             The content of the response.
         Raises:
             An exception depending on the HTTP status code of the response.
         """
-        with open(filename, 'r') as f:
-            return self._make_request(method, path, data=data, files=[f, ])
+        return self._make_request(method, path, data=data, files={"file": BytesIO(content)})
+
