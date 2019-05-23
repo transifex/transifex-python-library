@@ -224,16 +224,25 @@ class BaseModel(object):
             AttributeError: if a given field is not included in
                 `self.writable_fields`,
         """
+        # First update the object's _modified_fields. We want to do this
+        # manually, and not through setattr(), so we won't overwrite any
+        # url_field that would cause the update call to fail.
         for field in fields:
             if field in self.writable_fields:
-                setattr(self, field, fields[field])
+                self._modified_fields[field] = fields[field]
             else:
                 self._handle_wrong_field(field, ATTR_TYPE_WRITE)
 
+        # Then do the actual update / create
         if self._populated_fields:
             self._update(**self._modified_fields)
         else:
             self._create(**self._modified_fields)
+
+        # Finally update the object with its final values
+        for field in fields:
+            if field in self.writable_fields:
+                setattr(self, field, fields[field])
 
     def delete(self):
         """Delete the instance from the remote Transifex server."""

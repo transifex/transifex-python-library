@@ -17,7 +17,7 @@ def auto_clean_registry():
 class DummyModel(BaseModel):
     """A dummy class useful for testing behaviour that requires
     some configuration that is not defined in BaseModel."""
-    writable_fields = {'name', 'description'}
+    writable_fields = {'name', 'description', 'slug'}
     url_fields = {'slug'}
 
 
@@ -181,3 +181,20 @@ class TestBaseModel():
             obj._handle_wrong_field('anything', 'yo')
 
         assert 'Invalid attribute type: yo' == excinfo.value.args[0]
+
+    @patch('txlib.http.http_requests.requests.request')
+    def test_updating_url_field_of_object(self, mock_request):
+        mock_request.return_value = get_mock_response(
+            200, '{"id": 100, "slug": "slug"}'
+        )
+        obj = DummyModel.get(slug='slug')
+
+        mock_request.return_value = get_mock_response(
+            200, '{"id": 100, "slug": "new-slug"'
+        )
+        obj.save(
+            slug='new-slug'
+        )
+
+        assert obj.slug == 'new-slug'
+        assert mock_request.call_count == 2
