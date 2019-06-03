@@ -31,12 +31,39 @@ class Resource(BaseModel):
         self._populated_fields['content'] = res['content']
         return res['content']
 
+    def _create(self, **kwargs):
+        """Create a resource in the remote Transifex server."""
+        path = self._construct_path_to_collection()
+        content = kwargs['content']
+        is_binary = not isinstance(content, str)
+
+        # Use the fields for which we have values
+        for field in self.writable_fields:
+            try:
+                value = getattr(self, field)
+                kwargs[field] = value
+                # on binary files pass the content as a separate
+                # parameter (not in kwargs)
+                if field == 'content' and is_binary:
+                    kwargs.pop('content', None)
+            except AttributeError:
+                pass
+
+        if is_binary:
+            return self._http.post(path, kwargs, content)
+
+        return self._http.post(path, json.dumps(kwargs))
+
     def _update(self, **kwargs):
         """Use separate URL for updating the source file."""
         if 'content' in kwargs:
             content = kwargs.pop('content')
             path = self._construct_path_to_source_content()
-            self._http.put(path, json.dumps({'content': content}))
+            is_binary = not isinstance(content, str)
+            if not is_binary:
+                self._http.put(path, json.dumps({'content': content}))
+            else:
+                self._http.put(path, kwargs, content)
         super(Resource, self)._update(**kwargs)
 
     def _construct_path_to_source_content(self):

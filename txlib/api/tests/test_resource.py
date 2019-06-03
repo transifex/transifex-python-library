@@ -43,17 +43,47 @@ class TestResourceModel():
 
     @patch('txlib.http.http_requests.requests.request')
     def test_save_content(self, mock_request):
+        some_content = 'string1\\nstring2\\nstring3'
         mock_request.return_value = get_mock_response(
-            200, '{"content": "string1\\nstring2\\nstring3"}'
+            200, '{{"content": "{}"}}'
         )
-
         resource = Resource(project_slug='project1', slug='resource1')
         resource.save(
             name='Resource1',
-            content='string1\\nstring2\\nstring3'
+            content=some_content
         )
         assert resource.slug == 'resource1'
-        assert resource.content == 'string1\\nstring2\\nstring3'
+        assert resource.content == some_content
+
+    @patch('txlib.api.resources.Resource._update')
+    @patch('txlib.api.resources.Resource._create')
+    @patch('txlib.http.http_requests.requests.request')
+    def test_create_and_update(self, mock_request, mock_create, mock_update):
+        # save a new resource
+        resource = Resource(project_slug='project1', slug='resource2')
+        resource.save(
+            name='Resource2',
+            content='string1\\nstring2\\nstring3',
+        )
+        mock_create.assert_called_once_with(
+            content='string1\\nstring2\\nstring3',
+            name='Resource2'
+        )
+
+        # update an existing resource
+        mock_request.return_value = get_mock_response(
+            200,
+            """{"id": 2, "slug": "resource2", "content": "string1\\nstring2\\nstring3\\nstring4"}"""
+        )
+        resource = Resource.get(project_slug='project2', slug='resource2')
+        resource.save(
+            name='Resource2',
+            content='string1\\nstring2\\nstring3\\nstring4',
+        )
+        mock_update.assert_called_once_with(
+            content='string1\\nstring2\\nstring3\\nstring4',
+            name='Resource2'
+        )
 
     @patch('txlib.http.http_requests.requests.request')
     def test_update_content(self, mock_request):
@@ -91,3 +121,30 @@ class TestResourceModel():
             name='Resource--1',
         )
         assert resource.name == 'Resource--1'
+
+    @patch('txlib.http.http_requests.HttpRequest.post')
+    def test_binary_file_create(self, mock_post):
+        """Test that a binary file creation calls post method."""
+        resource = Resource(project_slug='project1', slug='resource2')
+        resource.save(
+            name='Resource2',
+            content=b'string1\\nstring2\\nstring3',
+            i18n_type='XLSX'
+        )
+        assert mock_post.called
+
+    @patch('txlib.http.http_requests.requests.request')
+    @patch('txlib.http.http_requests.HttpRequest.put')
+    def test_binary_file_update(self, mock_put, mock_request):
+        """Test that a binary file update calls put method."""
+        mock_request.return_value = get_mock_response(
+            200,
+            """{"id": 2, "slug": "resource2", "content": "string1\\nstring2\\nstring3\\nstring4"}"""
+        )
+        resource = Resource.get(project_slug='project2', slug='resource2')
+        resource.save(
+            name='Resource2',
+            content=b'string1\\nstring2\\nstring3\\nstring4',
+            i18n_type='XLSX'
+        )
+        assert mock_put.called

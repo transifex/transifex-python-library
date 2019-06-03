@@ -36,14 +36,31 @@ class TestTranslationModel():
                     "redirect": ""\
                   }'
         )
-        content = {
-            'Master_key': 'τεστ'
-        }
+        content = 'string1\\nstring2\\nstring3'
         translation = Translation(
             project_slug='project1', slug='resource1', lang='el'
         )
         translation.save(content=content)
         assert translation.lang == 'el'
-        assert translation.content == {'Master_key': 'τεστ'}
+        assert translation.content == content
+
+    @patch('txlib.http.http_requests.requests.request')
+    @patch('txlib.http.http_requests.HttpRequest.put')
+    def test_put_translation_binary(self, mock_put, mock_req):
+        """Test that a binary translation file calls put method."""
+        mock_req.return_value = get_mock_response(
+            200, '{\
+                            "project_slug": "project1",\
+                            "slug": "resource1",\
+                            "lang": "en",\
+                            "i18n_type": "XLSX"\
+                          }'
+        )
+
+        translation = Translation(
+            project_slug='project1', slug='resource1', lang='el'
+        )
+        translation.save(content=b'string1\\nstring2\\nstring3\\nstring4')
+        assert mock_put.called
 
 

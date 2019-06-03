@@ -22,12 +22,21 @@ class Translation(BaseModel):
         object's case, it needs to be `PUT`, while in the BaseModel is `POST`
         """
         path = self._construct_path_to_collection()
+        content = kwargs['content']
+        is_binary = not isinstance(content, str)
 
         # Use the fields for which we have values
         for field in self.writable_fields:
             try:
                 value = getattr(self, field)
                 kwargs[field] = value
+                # on binary files pass the content as a separate parameter (not in kwargs)
+                if field == 'content' and is_binary:
+                    kwargs.pop('content', None)
             except AttributeError:
                 pass
+
+        if is_binary:
+            return self._http.put(path, kwargs, content)
+
         return self._http.put(path, json.dumps(kwargs))
