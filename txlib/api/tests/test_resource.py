@@ -42,6 +42,19 @@ class TestResourceModel():
         assert content == 'string1\nstring2\nstring3'
 
     @patch('txlib.http.http_requests.requests.request')
+    def test_get_stats(self, mock_request):
+        mock_request.return_value = get_mock_response(
+            200, '{"id": 100, "slug": "resource1"}'
+        )
+        resource = Resource.get(project_slug='project1', slug='resource1')
+
+        mock_request.return_value = get_mock_response(
+            200, '{"el": {"completed": "91%"}}'
+        )
+        stats = resource.get_stats()
+        assert stats == {"el": {"completed": "91%"}}
+
+    @patch('txlib.http.http_requests.requests.request')
     def test_save_content(self, mock_request):
         some_content = 'string1\\nstring2\\nstring3'
         mock_request.return_value = get_mock_response(
