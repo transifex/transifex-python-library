@@ -14,7 +14,7 @@ class HttpRequest(BaseRequest):
     This class can handle both HTTP and HTTPS requests.
     """
 
-    def get(self, path):
+    def get(self, path, params=None):
         """Make a GET request.
 
         Args:
@@ -24,7 +24,7 @@ class HttpRequest(BaseRequest):
         Raises:
             An exception depending on the HTTP status code of the response.
         """
-        return json.loads(self._make_request('GET', path))
+        return json.loads(self._make_request('GET', path, params=params))
 
     def post(self, path, data, content=None):
         """Make a POST request.
@@ -80,7 +80,7 @@ class HttpRequest(BaseRequest):
         """
         return self._make_request('DELETE', path)
 
-    def _make_request(self, method, path, data=None, **kwargs):
+    def _make_request(self, method, path, data=None, params=None, **kwargs):
         """Make a request.
 
         Use the `requests` module to actually perform the request.
@@ -105,7 +105,7 @@ class HttpRequest(BaseRequest):
         if self._auth_info._headers:
             kwargs.setdefault('headers', {}).update(self._auth_info._headers)
 
-        res = requests.request(method, url, data=data, **kwargs)
+        res = requests.request(method, url, data=data, params=params, **kwargs)
 
         if res.ok:
             _logger.debug("Request was successful.")
