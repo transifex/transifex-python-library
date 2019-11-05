@@ -114,6 +114,10 @@ class BaseModel(object):
         of the request, so that a particular entry of this model
         is identified and retrieved.
 
+        You can also specify a `params` dictionary in `kwargs`
+        which will contain additional query parameters to be used in the
+        request, e.g. `GET https://some.url?param1=3&param2=4
+
         Raises:
             AttributeError: if not all values for parameters in `url_fields`
                 are passed as kwargs
@@ -255,7 +259,7 @@ class BaseModel(object):
     def _get(self, **kwargs):
         """Get the resource from a remote Transifex server."""
         path = self._construct_path_to_item()
-        return self._http.get(path)
+        return self._http.get(path, params=kwargs.pop('params', None))
 
     def _create(self, **kwargs):
         """Create a resource in the remote Transifex server."""
