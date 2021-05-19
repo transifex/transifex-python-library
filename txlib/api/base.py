@@ -269,7 +269,8 @@ class BaseModel(object):
         for field in self.writable_fields:
             try:
                 value = getattr(self, field)
-                kwargs[field] = value
+                if field in self.mandatory_fields:
+                    kwargs[field] = getattr(self, field)
             except AttributeError:
                 pass
         return self._http.post(path, json.dumps(kwargs))

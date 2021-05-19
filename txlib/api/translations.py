@@ -7,7 +7,7 @@ from txlib.api.base import BaseModel
 class Translation(BaseModel):
     """Model class for translations."""
 
-    _path_to_item = 'project/%(project_slug)s/resource/%(slug)s/translation/%(lang)s'  # noqa
+    _path_to_item = 'project/%(project_slug)s/resource/%(slug)s/translation/%(lang)s/'  # noqa
     _path_to_collection = 'project/%(project_slug)s/resource/'\
                           '%(slug)s/translation/%(lang)s'
 
